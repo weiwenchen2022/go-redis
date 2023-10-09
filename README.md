@@ -32,3 +32,48 @@ Then install go-redis:
 ```shell
 go get github.com/weiwenchen2022/go-redis
 ```
+
+## Quickstart
+
+```go
+import (
+    "context"
+    "fmt"
+
+    "github.com/weiwenchen2022/go-redis"
+)
+
+func ExampleClient() {
+    var (
+        ctx = context.Background()
+        rdb = redis.NewClient(&redis.Options{
+            Addr:     "localhost:6379",
+            Password: "", // no password set
+            DB:       0,  // use default DB
+        })
+    )
+
+    err := rdb.Do(ctx, "SET", "key", "value").Err()
+    if err != nil {
+        panic(err)
+    }
+
+    val, err := rdb.Do(ctx, "GET", "key").String()
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println("key", val)
+
+    val2, err := rdb.Get(ctx, "missing_key").String()
+    switch err {
+    default:
+        panic(err)
+    case redis.Nil:
+        fmt.Println("missing_key does not exist")
+    case nil:
+        fmt.Println("missing_key", val2)
+    }
+    // Output: key value
+    // missing_key does not exist
+}
+```
